@@ -1,30 +1,47 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import api from "./services/api"
 
 import "./styles.css";
 
 function App() {
+
+  const [repositories, setrepositories] = useState([]);
+
+  useEffect(() => {
+    api.get("repositories").then(response => {
+      setrepositories(response.data);
+    });
+  }, []);
+
   async function handleAddRepository() {
-    // TODO
+    const response = await api.post('repositories', {
+      title: 'VueJs',
+      url: 'https://github.com/algaworks/curso-angular-rest-spring-boot-api/tree/master/7.2%20Profiles%20do%20Spring/algamoney-api/src/main/resources/db/migration',
+      techs: ['VueJS', 'javascript'],
+      like: 0
+    });
+
+    const repository = response.data;
+    setrepositories([...repositories, repository]);
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+
+    const repositoryId = id;
+    console.log(repositoryId)
+    const response = await api.delete(`repositories/${repositoryId}`,);
+
+    setrepositories(repositories.filter(repository => repository.id !== repositoryId));
+
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        <li>
-          Repositório 1
-
-          <button onClick={() => handleRemoveRepository(1)}>
-            Remover
-          </button>
-        </li>
+        {repositories.map(repository => <li key={repository.id}> <strong>{repository.title} </strong> <button onClick={() => handleRemoveRepository(repository.id)}>Remover</button> </li>)}
       </ul>
-
       <button onClick={handleAddRepository}>Adicionar</button>
-    </div>
+    </div >
   );
 }
 
